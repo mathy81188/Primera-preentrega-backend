@@ -18,17 +18,19 @@ class CartManager {
     }
   }
 
-  async createCart(newCart) {
+  async createCart() {
     try {
       const carts = await this.getCarts({});
       let id;
+      let products;
       if (!carts.length) {
         id = 1;
+        products = [];
       } else {
         id = carts[carts.length - 1].id + 1;
+        products = [];
       }
-      carts.push({ id, ...newCart });
-
+      carts.push({ id, ...products });
       await fs.promises.writeFile(this.path, JSON.stringify(carts));
     } catch (error) {
       return error;
@@ -36,7 +38,7 @@ class CartManager {
   }
   async getCartById(cid) {
     try {
-      const carts = await this.getCarts();
+      const carts = await this.getCarts({});
       console.log("prods", carts);
       const cart = carts.find((c) => c.id === cid);
       return cart;
@@ -45,31 +47,35 @@ class CartManager {
     }
   }
 
-  async addProductToCart(pid, cid) {
+  async addProductToCart(cid, pid) {
     try {
-      const cart = await this.getCartById(cid);
-      console.log("cart", cart);
-      selectedProduct = cart.find((product) => product.id === pid);
-      if (cart.some((product) => product.id === selectedProduct.id)) {
-        let productIndex = cart.findIndex(product.id === selectedProduct.id);
-        cart[productIndex].quantity++;
-      } else {
-        cart.push({
-          product: selectedProduct.id,
+      const carts = await this.getCarts();
+      let cart = { ...(await this.getCartById(cid)) };
+
+      let productIndex = cart.products.findIndex(
+        (product) => product.product === +pid
+      );
+      if (productIndex === -1) {
+        cart.products.push({
+          product: +pid,
           quantity: 1,
         });
-        await fs.promises.writeFile(this.path, JSON.stringify(cart));
+      } else {
+        cart.products[productIndex].quantity += 1;
       }
+
+      const cartIndex = carts.findIndex((cart) => cart.id === +cid);
+      carts[cartIndex] = cart;
+
+      let result = await fs.promises.writeFile(
+        this.path,
+        JSON.stringify(carts)
+      );
+      return result;
     } catch (error) {
       return error;
     }
   }
 }
-/*
-async function test() {
-  const cart = new CartManager("cart.json");
-  await cart.createCart();
-  console.log(cart);
-}
-test();*/
+
 export default new CartManager("cart.json");
