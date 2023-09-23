@@ -29,13 +29,13 @@ router.get("/:cid", async (req, res) => {
   }
 });
 
-router.post("/:cid/product/:pid ", async (req, res) => {
+router.post("/:cid/product/:pid", async (req, res) => {
   try {
     const { cid, pid } = req.params;
 
     const cart = await CartManager.addProductToCart(+cid, +pid);
 
-    res.status(200).json({ message: cart });
+    res.status(200).json({ message: "Product added to the Cart" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -49,8 +49,9 @@ class CartManager {
 
   async addProductToCart(cid, pid) {
     try {
-      const carts = await this.getCarts();
-      let cart = { ...(await this.getCartById(cid)) };
+      const carts = await this.getCarts({});
+      let cart = await this.getCartById(+cid);
+      console.log(cart);
 
       let productIndex = cart.products.findIndex(
         (product) => product.product === +pid
@@ -67,11 +68,7 @@ class CartManager {
       const cartIndex = carts.findIndex((cart) => cart.id === +cid);
       carts[cartIndex] = cart;
 
-      let result = await fs.promises.writeFile(
-        this.path,
-        JSON.stringify(carts)
-      );
-      return result;
+      await fs.promises.writeFile(this.path, JSON.stringify(carts));
     } catch (error) {
       return error;
     }

@@ -28,6 +28,7 @@ class ProductManager {
       if (
         !product.title ||
         !product.description ||
+        !product.category ||
         !product.price ||
         !product.thumbnail ||
         !product.code ||
